@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PriceVision AI | Conversor de Precios USD ⇄ VES con Gemini</title>
+  <meta name="description"
+    content="Toma fotos o sube imágenes de productos para convertir precios automáticamente entre Dólares y Bolívares usando la Inteligencia Artificial de Google Gemini.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!-- Fondo con efecto de gradientes dinámicos -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header Principal -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-icon">
+          <span class="icon-sparkle">✨</span>
+          <span class="icon-camera">📷</span>
+        </div>
+        <div>
+          <h1 class="brand-title">PriceVision <span>AI</span></h1>
+          <p class="brand-subtitle">Conversor Visual de Precios USD ⇄ VES con Gemini</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Ticker de Tasa de Cambio en Vivo -->
+        <div class="rate-ticker" id="rateTicker">
+          <div class="rate-indicator"></div>
+          <div class="rate-info">
+            <span class="rate-label">Tasa Oficial USD</span>
+            <div class="rate-value-group">
+              <span class="rate-val" id="tickerRateVal">--.--</span>
+              <span class="rate-currency">VES/$</span>
+            </div>
+          </div>
+          <button class="icon-btn" id="btnRefreshRate" title="Actualizar tasa oficial">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Botón Configuración (API Key & Modelo) -->
+        <button class="settings-btn" id="btnOpenSettings" title="Configurar API Key y Modelo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <span class="btn-text">Configuración</span>
+          <span class="key-status-dot" id="headerKeyDot"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Barra de Configuración Rápida de Conversión -->
+    <section class="controls-bar">
+      <!-- Selector de Modo de Conversión -->
+      <div class="control-group">
+        <label class="control-label">Modo de Conversión:</label>
+        <div class="mode-pills" id="modeSelector">
+          <button type="button" class="mode-pill active" data-mode="AUTO">
+            <span class="pill-icon">⚡</span> Auto-Detectar
+          </button>
+          <button type="button" class="mode-pill" data-mode="USD_TO_VES">
+            <span class="pill-icon">💵</span> USD → VES (Bs)
+          </button>
+          <button type="button" class="mode-pill" data-mode="VES_TO_USD">
+            <span class="pill-icon">🇻🇪</span> VES (Bs) → USD
+          </button>
+        </div>
+      </div>
+
+      <!-- Tasa de Cambio Personalizable -->
+      <div class="control-group rate-control-group">
+        <label class="control-label" for="inputCustomRate">Tasa de Cambio a Aplicar:</label>
+        <div class="input-with-addon">
+          <span class="input-addon">1 USD =</span>
+          <input type="number" step="0.01" min="0.01" id="inputCustomRate" placeholder="Ej. 54.50" class="rate-input">
+          <span class="input-addon">VES</span>
+          <button type="button" class="btn-reset-rate" id="btnSyncOfficialRate" title="Usar tasa oficial del BCV">
+            ↺ Oficial
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grid Principal de la Aplicación -->
+    <main class="app-main-grid">
+      <!-- PANEL IZQUIERDO: Captura / Carga de Imagen -->
+      <section class="glass-card capture-card">
+        <div class="card-header">
+          <div class="tab-switcher">
+            <button class="tab-btn active" id="tabCamera" data-tab="camera">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              Cámara en Vivo
+            </button>
+            <button class="tab-btn" id="tabUpload" data-tab="upload">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              Subir Archivo
+            </button>
+          </div>
+          <span class="badge-gemini" id="modelBadge">
+            <span class="gemini-sparkle">✦</span>
+            <span id="badgeModelName">gemini-2.5-flash</span>
+          </span>
+        </div>
+
+        <div class="card-body">
+          <!-- VISTA 1: Cámara en Vivo -->
+          <div class="view-panel active" id="viewCamera">
+            <div class="camera-viewport-container">
+              <video id="cameraVideo" playsinline autoplay muted></video>
+              <canvas id="cameraCanvas" style="display: none;"></canvas>
+
+              <!-- Flash visual al capturar -->
+              <div class="camera-flash" id="cameraFlash"></div>
+
+              <!-- Superposición de visor / guía de encuadre -->
+              <div class="viewfinder-overlay">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="viewfinder-hint">Apunta hacia el precio o etiqueta</div>
+              </div>
+
+              <!-- Estado cuando la cámara está apagada o sin permiso -->
+              <div class="camera-placeholder" id="cameraPlaceholder">
+                <div class="placeholder-icon">📷</div>
+                <h3>Cámara lista para iniciar</h3>
+                <p>Presiona el botón para activar la cámara de tu dispositivo</p>
+                <button class="btn btn-primary" id="btnStartCamera">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polygon points="10 8 16 12 10 16 10 8" />
+                  </svg>
+                  Encender Cámara
+                </button>
+              </div>
+            </div>
+
+            <div class="camera-toolbar">
+              <button class="btn btn-secondary btn-icon-only" id="btnSwitchCamera"
+                title="Cambiar Cámara (Frontal/Trasera)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 10c0-4.4-3.6-8-8-8s-8 3.6-8 8v4h2l-3 4-3-4h2v-4c0-5.5 4.5-10 10-10s10 4.5 10 10h-2z" />
+                  <path d="M4 14c0 4.4 3.6 8 8 8s8-3.6 8-8v-4h-2l3-4 3 4h-2v4c0 5.5-4.5 10-10 10S2 19.5 2 14h2z" />
+                </svg>
+              </button>
+              <button class="btn btn-capture" id="btnCapturePhoto" disabled>
+                <div class="capture-inner-circle"></div>
+                <span>Tomar Foto y Escanear</span>
+              </button>
+              <button class="btn btn-secondary btn-icon-only" id="btnStopCamera" title="Detener Cámara">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="6" y="6" width="12" height="12" rx="2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- VISTA 2: Subir Archivo / Drag and Drop -->
+          <div class="view-panel" id="viewUpload">
+            <div class="drop-zone" id="dropZone">
+              <input type="file" id="fileInput" accept="image/*" class="file-input-hidden">
+              <div class="drop-content">
+                <div class="drop-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                </div>
+                <h3>Arrastra una foto aquí</h3>
+                <p>o <span class="highlight-link">explora desde tu equipo o móvil</span></p>
+                <span class="drop-hint">Soporta JPG, PNG, WEBP o pegado directo (Ctrl + V)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- VISTA PREVIA DE LA IMAGEN SELECCIONADA -->
+          <div class="preview-container" id="previewContainer" style="display: none;">
+            <div class="preview-header">
+              <span class="preview-title">Foto lista para analizar</span>
+              <button class="btn-clear-preview" id="btnClearPreview" title="Quitar foto">✕ Cambiar foto</button>
+            </div>
+            <div class="preview-image-wrapper">
+              <img id="previewImage" alt="Vista previa" src="">
+              <!-- Línea láser de escaneo animada -->
+              <div class="scan-laser" id="scanLaser"></div>
+            </div>
+            <button class="btn btn-primary btn-block btn-scan-now" id="btnProcessPreview">
+              <span class="btn-sparkle">⚡</span> Escanear y Convertir Precios con Gemini
+            </button>
+          </div>
+
+          <!-- Botones de prueba rápida (Demo Price Tags) -->
+          <div class="quick-samples">
+            <span class="samples-label">¿Sin fotos a mano? Prueba un ejemplo:</span>
+            <div class="samples-buttons">
+              <button class="sample-btn" data-sample="groceries">🛒 Víveres ($12.50)</button>
+              <button class="sample-btn" data-sample="shoes">👟 Calzado ($45.00)</button>
+              <button class="sample-btn" data-sample="supermarket">🏷️ Etiqueta en Bs (Bs. 850)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL DERECHO: Resultados de Conversión -->
+      <section class="glass-card results-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+            Resultados de Conversión
+          </h2>
+          <div class="results-actions" id="resultsActions" style="display: none;">
+            <button class="btn-tool" id="btnCopyResults" title="Copiar resumen al portapapeles">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              Copiar
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body results-body" id="resultsContent">
+          <!-- ESTADO 1: Inicial / Vacío -->
+          <div class="empty-state" id="emptyState">
+            <div class="empty-illustration">
+              <div class="empty-glow"></div>
+              <span class="empty-icon">🏷️</span>
+            </div>
+            <h3>Esperando imagen para analizar</h3>
+            <p>Toma una foto con tu cámara o sube una imagen de un producto o etiqueta de precio. Gemini detectará
+              automáticamente los montos y calculará el cambio en tiempo real.</p>
+            <div class="features-list">
+              <div class="feature-item">
+                <span class="feat-check">✓</span> Detección OCR inteligente con <code>gemini-2.5-flash</code>
+              </div>
+              <div class="feature-item">
+                <span class="feat-check">✓</span> Conversión instantánea con tasas del BCV
+              </div>
+              <div class="feature-item">
+                <span class="feat-check">✓</span> Soporte para múltiples productos en una sola foto
+              </div>
+            </div>
+          </div>
+
+          <!-- ESTADO 2: Cargando / Procesando -->
+          <div class="loading-state" id="loadingState" style="display: none;">
+            <div class="loading-orb">
+              <div class="orb-ring ring-1"></div>
+              <div class="orb-ring ring-2"></div>
+              <div class="orb-center">✨</div>
+            </div>
+            <h3 class="loading-title">Analizando con Gemini AI...</h3>
+            <p class="loading-status" id="loadingStatusText">Leyendo texto y etiquetas de precios en la imagen...</p>
+            <div class="loading-progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+          </div>
+
+          <!-- ESTADO 3: Resultados Renderizados -->
+          <div class="results-rendered" id="resultsRendered" style="display: none;">
+            <!-- Resumen Total / Encabezado del resultado -->
+            <div class="result-summary-box">
+              <div class="summary-col">
+                <span class="summary-label">Monto Total Original</span>
+                <span class="summary-val val-orig" id="sumTotalOriginal">$ 0.00</span>
+              </div>
+              <div class="summary-arrow">➜</div>
+              <div class="summary-col">
+                <span class="summary-label">Monto Total Convertido</span>
+                <span class="summary-val val-conv" id="sumTotalConverted">Bs. 0.00</span>
+              </div>
+            </div>
+
+            <!-- Tasa y Moneda Info -->
+            <div class="result-meta-bar">
+              <div class="meta-pill">
+                <span class="meta-dot"></span>
+                <span>Tasa aplicada: <strong id="resRateApplied">--</strong> VES/USD</span>
+              </div>
+              <div class="meta-pill">
+                <span>Modo: <strong id="resModeApplied">AUTO</strong></span>
+              </div>
+            </div>
+
+            <!-- Lista de Productos Detectados -->
+            <div class="products-section">
+              <h3 class="section-subtitle">
+                <span>Productos & Precios Detectados (<span id="detectedItemsCount">0</span>)</span>
+              </h3>
+              <div class="product-cards-list" id="productsList">
+                <!-- Se llena dinámicamente con JS -->
+              </div>
+            </div>
+
+            <!-- Notas del análisis y texto crudo -->
+            <div class="analysis-notes-box" id="analysisNotesBox">
+              <div class="notes-header">
+                <span>📝 Resumen del Análisis</span>
+              </div>
+              <p class="notes-text" id="analysisNotesText"></p>
+              <details class="raw-text-details">
+                <summary>Ver texto detectado por OCR</summary>
+                <pre class="raw-text-box" id="rawTextBox"></pre>
+              </details>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal de Configuración -->
+    <div class="modal-backdrop" id="settingsModal" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-icon">⚙️</span>
+            <h3>Configuración de Gemini</h3>
+          </div>
+          <button class="modal-close-btn" id="btnCloseSettings">✕</button>
+        </div>
+        <div class="modal-body">
+          <!-- API Key Input -->
+          <div class="form-group">
+            <label class="form-label" for="inputApiKey">
+              Google Gemini API Key:
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="help-link">Obtener
+                clave gratuita ↗</a>
+            </label>
+            <div class="input-password-wrapper">
+              <input type="password" id="inputApiKey" placeholder="AIzaSy..." class="form-input">
+              <button type="button" class="btn-toggle-visibility" id="btnToggleApiKey">👁️</button>
+            </div>
+            <span class="form-hint">
+              Se guarda únicamente en el almacenamiento local de tu navegador. Si dejas este campo vacío, el servidor
+              usará la variable <code>GEMINI_API_KEY</code> de su archivo <code>.env</code>.
+            </span>
+          </div>
+
+          <!-- Selector de Modelo -->
+          <div class="form-group">
+            <label class="form-label" for="selectGeminiModel">Modelo de Gemini:</label>
+            <select id="selectGeminiModel" class="form-select">
+              <option value="gemini-3.5-flash-lite" selected>gemini-3.5-flash-lite (Ultra rápido, económico y
+                multimodal)</option>
+              <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Alta velocidad y bajo costo)</option>
+              <option value="gemini-3-flash-preview">gemini-3-flash-preview (Multimodal)</option>
+            </select>
+            <span class="form-hint">Todos estos modelos soportan análisis de imágenes en alta velocidad.</span>
+          </div>
+
+          <!-- Estado de conexión del servidor -->
+          <div class="server-status-card" id="serverStatusCard">
+            <div class="status-row">
+              <span>Estado del Servidor:</span>
+              <span class="status-badge" id="serverStatusBadge">Conectando...</span>
+            </div>
+            <div class="status-row">
+              <span>Clave en servidor (.env):</span>
+              <span id="serverKeyStatus">Verificando...</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnCancelSettings">Cancelar</button>
+          <button class="btn btn-primary" id="btnSaveSettings">Guardar Configuración</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenedor de Notificaciones Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
