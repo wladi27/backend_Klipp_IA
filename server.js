@@ -9,7 +9,7 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 4002;
 const BCV_API_URL = process.env.BCV_API_URL || 'http://localhost:3003/api/v1/tipo-cambio';
-const DEFAULT_MODEL = process.env.DEFAULT_GEMINI_MODEL || 'gemini-3.5-flash-lite';
+const DEFAULT_MODEL = process.env.DEFAULT_GEMINI_MODEL || 'gemini-3.6-flash';
 
 // Configuración de Multer (Almacenamiento en Memoria para procesamiento rápido)
 const upload = multer({
@@ -156,9 +156,12 @@ INSTRUCCIONES CLAVE:
 `;
 
   const modelsToTry = [chosenModel];
-  if (!modelsToTry.includes('gemini-3.5-flash-lite')) modelsToTry.push('gemini-3.5-flash-lite');
-  if (!modelsToTry.includes('gemini-flash-lite-latest')) modelsToTry.push('gemini-flash-lite-latest');
   if (!modelsToTry.includes('gemini-3.6-flash')) modelsToTry.push('gemini-3.6-flash');
+  if (!modelsToTry.includes('gemini-3.7-flash')) modelsToTry.push('gemini-3.7-flash');
+  if (!modelsToTry.includes('gemini-3.5-flash')) modelsToTry.push('gemini-3.5-flash');
+  if (!modelsToTry.includes('gemini-flash-latest')) modelsToTry.push('gemini-flash-latest');
+  if (!modelsToTry.includes('gemini-3.1-flash-lite')) modelsToTry.push('gemini-3.1-flash-lite');
+  if (!modelsToTry.includes('gemini-3.5-flash-lite')) modelsToTry.push('gemini-3.5-flash-lite');
 
   let lastError = null;
 
