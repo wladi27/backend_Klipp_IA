@@ -156,12 +156,13 @@ INSTRUCCIONES CLAVE:
 `;
 
   const modelsToTry = [chosenModel];
+  if (!modelsToTry.includes('gemini-3.5-flash-lite')) modelsToTry.push('gemini-3.5-flash-lite');
+  if (!modelsToTry.includes('gemini-flash-lite-latest')) modelsToTry.push('gemini-flash-lite-latest');
   if (!modelsToTry.includes('gemini-3.6-flash')) modelsToTry.push('gemini-3.6-flash');
   if (!modelsToTry.includes('gemini-3.7-flash')) modelsToTry.push('gemini-3.7-flash');
   if (!modelsToTry.includes('gemini-3.5-flash')) modelsToTry.push('gemini-3.5-flash');
   if (!modelsToTry.includes('gemini-flash-latest')) modelsToTry.push('gemini-flash-latest');
   if (!modelsToTry.includes('gemini-3.1-flash-lite')) modelsToTry.push('gemini-3.1-flash-lite');
-  if (!modelsToTry.includes('gemini-3.5-flash-lite')) modelsToTry.push('gemini-3.5-flash-lite');
 
   let lastError = null;
 
